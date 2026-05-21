@@ -147,7 +147,11 @@
                 },
                 "skip_motifs": {
                     "type": "boolean",
-                    "description": "Skip HOMER motif analysis"
+                    "description": "Skip all motif analysis (HOMER, FIMO, SEA)"
+                },
+                "skip_homer": {
+                    "type": "boolean",
+                    "description": "Skip HOMER motif and annotation analysis"
                 },
                 "skip_crc": {
                     "type": "boolean",

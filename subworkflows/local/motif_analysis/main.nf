@@ -26,37 +26,45 @@ workflow MOTIF_ANALYSIS {
     genome              // val: genome name
 
     main:
-    ch_versions = Channel.empty()
+    ch_versions          = Channel.empty()
+    ch_homer_motifs_se   = Channel.empty()
+    ch_homer_motifs_te   = Channel.empty()
+    ch_homer_annotations = Channel.empty()
 
-    //
-    // Find motifs in SE constituent peaks with HOMER
-    //
-    HOMER_FINDMOTIFSGENOME_SE (
-        ch_se_constituents,
-        ch_fasta,
-        genome
-    )
-    ch_versions = ch_versions.mix(HOMER_FINDMOTIFSGENOME_SE.out.versions.first())
+    if (!params.skip_homer) {
+        //
+        // Find motifs in SE constituent peaks with HOMER
+        //
+        HOMER_FINDMOTIFSGENOME_SE (
+            ch_se_constituents,
+            ch_fasta,
+            genome
+        )
+        ch_versions      = ch_versions.mix(HOMER_FINDMOTIFSGENOME_SE.out.versions.first())
+        ch_homer_motifs_se = HOMER_FINDMOTIFSGENOME_SE.out.motifs
 
-    //
-    // Find motifs in TE constituent peaks with HOMER
-    //
-    HOMER_FINDMOTIFSGENOME_TE (
-        ch_te_constituents,
-        ch_fasta,
-        genome
-    )
-    ch_versions = ch_versions.mix(HOMER_FINDMOTIFSGENOME_TE.out.versions.first())
+        //
+        // Find motifs in TE constituent peaks with HOMER
+        //
+        HOMER_FINDMOTIFSGENOME_TE (
+            ch_te_constituents,
+            ch_fasta,
+            genome
+        )
+        ch_versions      = ch_versions.mix(HOMER_FINDMOTIFSGENOME_TE.out.versions.first())
+        ch_homer_motifs_te = HOMER_FINDMOTIFSGENOME_TE.out.motifs
 
-    //
-    // Annotate super-enhancers with HOMER
-    //
-    HOMER_ANNOTATEPEAKS (
-        ch_super_enhancers,
-        ch_fasta,
-        ch_gtf
-    )
-    ch_versions = ch_versions.mix(HOMER_ANNOTATEPEAKS.out.versions.first())
+        //
+        // Annotate super-enhancers with HOMER
+        //
+        HOMER_ANNOTATEPEAKS (
+            ch_super_enhancers,
+            ch_fasta,
+            ch_gtf
+        )
+        ch_versions          = ch_versions.mix(HOMER_ANNOTATEPEAKS.out.versions.first())
+        ch_homer_annotations = HOMER_ANNOTATEPEAKS.out.txt
+    }
 
     //
     // Convert SE and TE constituent BEDs to FASTA
@@ -104,10 +112,10 @@ workflow MOTIF_ANALYSIS {
     ch_versions = ch_versions.mix(SEA_TE.out.versions.first())
 
     emit:
-    constituents = ch_se_constituents                         // channel: [ meta, bed ]
-    homer_motifs_se    = HOMER_FINDMOTIFSGENOME_SE.out.motifs        // channel: [ meta, motifs ]
-    homer_motifs_te    = HOMER_FINDMOTIFSGENOME_TE.out.motifs        // channel: [ meta, motifs ]
-    homer_annotations  = HOMER_ANNOTATEPEAKS.out.txt                // channel: [ meta, txt ]
+    constituents       = ch_se_constituents                   // channel: [ meta, bed ]
+    homer_motifs_se    = ch_homer_motifs_se                   // channel: [ meta, motifs ]
+    homer_motifs_te    = ch_homer_motifs_te                   // channel: [ meta, motifs ]
+    homer_annotations  = ch_homer_annotations                 // channel: [ meta, txt ]
     se_fimo      = FIMO_SE.out.tsv                            // channel: [ meta, tsv ]
     te_fimo      = FIMO_TE.out.tsv                            // channel: [ meta, tsv ]
     se_sea       = SEA_SE.out.tsv                             // channel: [ meta, tsv ]
