@@ -29,9 +29,10 @@ process ROSE2 {
     // group, and -g only accepts {MM8,MM9,MM10,HG18,HG19,HG38}. For an
     // assembly with no built-in annotation (e.g. T2T-CHM13) --custom must
     // REPLACE -g, not accompany it.
-    def genome_arg = params.custom_genome
-        ? "--custom ${params.custom_genome}"
-        : "-g ${genome.toString().toUpperCase()}"
+def customGenome = params.custom_genome ? file(params.custom_genome, checkIfExists: true) : null
+def genome_arg = customGenome
+    ? "--custom ${customGenome}"
+    : "-g ${genome.toString().toUpperCase()}"
 
     """
     rose2 main ${genome_arg} \\
