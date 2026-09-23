@@ -97,16 +97,37 @@ workflow SUPERENHANCER_CALLING {
     ch_tes              = Channel.empty()
     ch_ses_constituents = Channel.empty()
     ch_tes_constituents = Channel.empty()
+    ch_super_region_to_gene = Channel.empty()
+    ch_super_gene_to_region = Channel.empty()
+    ch_super_with_genes     = Channel.empty()
+    ch_all_region_to_gene   = Channel.empty()
+    ch_all_gene_to_region   = Channel.empty()
+    ch_all_with_genes       = Channel.empty()
+
+    // Staged as a process input (not interpolated as a host path) so the file is
+    // visible inside the container; `[]` means "absent" and keeps the -g branch.
+    ch_custom_genome = params.custom_genome
+        ? file(params.custom_genome, checkIfExists: true)
+        : []
 
     if (!params.skip_rose2) {
         ROSE2 (
             ch_for_rose2,
-            genome
+            genome,
+            ch_custom_genome
         )
         ch_versions        = ch_versions.mix(ROSE2.out.versions.first())
         ch_all_enhancers   = ROSE2.out.all_enhancers
         ch_super_enhancers = ROSE2.out.super_enhancers
         ch_plots           = ROSE2.out.plot
+
+        // Enhancer-to-gene assignments produced by rose2-geneMapper inside `rose2 main`
+        ch_super_region_to_gene = ROSE2.out.super_region_to_gene
+        ch_super_gene_to_region = ROSE2.out.super_gene_to_region
+        ch_super_with_genes     = ROSE2.out.super_with_genes
+        ch_all_region_to_gene   = ROSE2.out.all_region_to_gene
+        ch_all_gene_to_region   = ROSE2.out.all_gene_to_region
+        ch_all_with_genes       = ROSE2.out.all_with_genes
 
         //
         // Convert ROSE2 table to SE/TE BED files + constituent peaks
@@ -132,6 +153,12 @@ workflow SUPERENHANCER_CALLING {
     tes              = ch_tes              // channel: [ meta, path(bed) ]
     ses_constituents = ch_ses_constituents // channel: [ meta, path(bed) ]
     tes_constituents = ch_tes_constituents // channel: [ meta, path(bed) ]
+    super_region_to_gene = ch_super_region_to_gene // channel: [ meta, path(txt) ]
+    super_gene_to_region = ch_super_gene_to_region // channel: [ meta, path(txt) ]
+    super_with_genes     = ch_super_with_genes     // channel: [ meta, path(txt) ]
+    all_region_to_gene   = ch_all_region_to_gene   // channel: [ meta, path(txt) ]
+    all_gene_to_region   = ch_all_gene_to_region   // channel: [ meta, path(txt) ]
+    all_with_genes       = ch_all_with_genes       // channel: [ meta, path(txt) ]
     bam_bai         = ch_bam_bai          // channel: [ id, is_control, bai ]
     versions        = ch_versions         // channel: [ path ]
 
