@@ -54,6 +54,7 @@ input:
         layout) for assemblies with no built-in annotation. When provided it is
         passed as `--custom`, which replaces `-g`. Pass `[]` when absent.
       pattern: "*.ucsc"
+      optional: true
 
 output:
   - all_enhancers:
