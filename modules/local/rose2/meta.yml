@@ -47,6 +47,14 @@ input:
   - genome:
       type: string
       description: Genome assembly name (e.g., hg38, mm10)
+  - custom_genome:
+      type: file
+      description: |
+        Optional custom ROSE2 gene annotation table (16-column UCSC refGene
+        layout) for assemblies with no built-in annotation. When provided it is
+        passed as `--custom`, which replaces `-g`. Pass `[]` when absent.
+      pattern: "*.ucsc"
+      optional: true
 
 output:
   - all_enhancers:
@@ -54,19 +62,73 @@ output:
           type: map
           description: |
             Groovy Map containing sample information
-      - "*/*_AllEnhancers.table.txt":
+      - "*/*_AllStitched.table.txt":
           type: file
-          description: Table of all enhancers with H3K27ac signal
-          pattern: "*_AllEnhancers.table.txt"
+          description: Table of all stitched enhancers with H3K27ac signal
+          pattern: "*_AllStitched.table.txt"
   - super_enhancers:
       - meta:
           type: map
           description: |
             Groovy Map containing sample information
-      - "*/*_SuperEnhancers.table.txt":
+      - "*/*_SuperStitched.table.txt":
           type: file
           description: Table of super-enhancers identified by inflection point
-          pattern: "*_SuperEnhancers.table.txt"
+          pattern: "*_SuperStitched.table.txt"
+  - super_region_to_gene:
+      - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+      - "*/*_SuperStitched.table_REGION_TO_GENE.txt":
+          type: file
+          description: Super-enhancer regions with their overlapping, proximal and closest genes
+          pattern: "*_SuperStitched.table_REGION_TO_GENE.txt"
+  - super_gene_to_region:
+      - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+      - "*/*_SuperStitched.table_GENE_TO_REGION.txt":
+          type: file
+          description: Genes with the super-enhancer regions assigned to them
+          pattern: "*_SuperStitched.table_GENE_TO_REGION.txt"
+  - super_with_genes:
+      - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+      - "*/*_SuperStitched.table.table_withGENES.txt":
+          type: file
+          description: Super-enhancer table with gene assignment columns appended
+          pattern: "*_SuperStitched.table.table_withGENES.txt"
+  - all_region_to_gene:
+      - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+      - "*/*_AllStitched.table_REGION_TO_GENE.txt":
+          type: file
+          description: All stitched regions with their overlapping, proximal and closest genes
+          pattern: "*_AllStitched.table_REGION_TO_GENE.txt"
+  - all_gene_to_region:
+      - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+      - "*/*_AllStitched.table_GENE_TO_REGION.txt":
+          type: file
+          description: Genes with the stitched regions assigned to them
+          pattern: "*_AllStitched.table_GENE_TO_REGION.txt"
+  - all_with_genes:
+      - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+      - "*/*_AllStitched.table.table_withGENES.txt":
+          type: file
+          description: All-stitched table with gene assignment columns appended
+          pattern: "*_AllStitched.table.table_withGENES.txt"
   - plot:
       - meta:
           type: map
